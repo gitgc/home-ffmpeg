@@ -1,10 +1,14 @@
 # home-ffmpeg
 
-personal ffmpeg helper scripts
+personal ffmpeg helper scripts. Only tested for me on macOS.
+
+## Requirements
+
+- ffmpeg, installed and on your PATH.
 
 ## timelapse.sh
 
-Creates a timelapse video from a directory of images. The images must be named in a sequential order (e.g., img001.jpg, img002.jpg, etc.).
+Creates a timelapse video from a directory of images. Sorts images by file created date.
 
 ```bash
     ./timelapse.sh /path/to/images width height fps output_video.mp4
