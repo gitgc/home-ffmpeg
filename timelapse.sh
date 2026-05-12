@@ -29,11 +29,18 @@ if ! command -v ffmpeg &> /dev/null; then
     exit 1
 fi
 
-# Collect matching images once so the existence check and ffmpeg input stay in sync
+# Collect matching images once so the existence check and ffmpeg input stay in sync.
+# Sort by file creation time, then path, so frame order follows the original capture order.
 IMAGE_FILES=()
-while IFS= read -r image_file; do
+while IFS=$'\t' read -r creation_time image_file; do
     IMAGE_FILES+=("$image_file")
-done < <(find "$IMAGE_DIR" -maxdepth 1 -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' \) | LC_ALL=C sort -V)
+done < <(
+    find "$IMAGE_DIR" -maxdepth 1 -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' \) -print0 |
+        while IFS= read -r -d '' image_file; do
+            creation_time=$(stat -f '%B' "$image_file")
+            printf '%s\t%s\n' "${creation_time:-0}" "$image_file"
+        done | LC_ALL=C sort -n -k1,1 -k2,2
+)
 
 # Check if there are images in the directory
 if [ "${#IMAGE_FILES[@]}" -eq 0 ]; then
